@@ -23,6 +23,7 @@ import { useUploadFile } from "@/hooks/use-upload-file";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader } from "lucide-react";
+import { Doc } from "@/convex/_generated/dataModel";
 
 // Schema validation using Zod
 // Ensures form input adheres to defined rules such as required fields, types, and value limits
@@ -46,24 +47,28 @@ const packageSchema = z.object({
 // Infer the type of the form values based on the schema definition
 type PackageFormValues = z.infer<typeof packageSchema>;
 
-export default function AddPackageForm() {
+type Props = {
+  singlePackage: Doc<"package">;
+};
+
+export default function AddPackageForm({ singlePackage }: Props) {
   // Initialize React Hook Form with validation schema and default values
   const form = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema), // Use Zod schema for form validation
     defaultValues: {
-      name: "",
+      name: singlePackage.name,
       imageUrls: [],
-      price: 0,
-      location: "",
-      description: "",
-      type: "individual",
-      numberOfAdults: 1,
-      numberOfChildren: 0,
+      price: singlePackage.price,
+      location: singlePackage.location,
+      description: singlePackage.description,
+      type: singlePackage.type,
+      numberOfAdults: singlePackage.numberOfAdults,
+      numberOfChildren: singlePackage.numberOfChildren,
     },
   });
 
   // Convex mutation hook to call an API function to add the package
-  const addPackage = useMutation(api.package.addPackage);
+  const addPackage = useMutation(api.package.updatePackage);
 
   // Destructure the required values from the custom hook for file uploading
   const { progresses, uploadedFiles } = useUploadFile("packageImage", {
@@ -75,11 +80,19 @@ export default function AddPackageForm() {
   // Handle form submission
   // This function handles both image uploads and package data submission
   async function onSubmit(data: PackageFormValues) {
+    try {
+      // Display a loading toast to the user while images are being uploaded
+      await toast.promise(
+        // Start uploading the selected files
+        startUpload(data.imageUrls).then(async (res) => {
+          // Map over the upload response to extract URLs of uploaded images
+          const urls = res?.map((re) => re.url);
 
           // Check if URLs were successfully retrieved from the upload response
           if (urls) {
             // Call the `addPackage` mutation to save the package details
             await addPackage({
+              packageId: singlePackage._id,
               description: data.description, // Package description (optional)
               type: data.type, // Package type (individual or corporate)
               price: data.price, // Price of the package
@@ -88,6 +101,7 @@ export default function AddPackageForm() {
               name: data.name, // Name of the package
               numberOfChildren: data.numberOfChildren, // Number of children for the package
               imageUrls: urls, // Uploaded image URLs
+              features: [],
             });
           } else {
             throw new Error("No URLs returned from the upload process."); // Handle case where no URLs are returned
@@ -102,7 +116,6 @@ export default function AddPackageForm() {
     } catch (error) {
       console.error("Error in onSubmit:", error); // Log the error for debugging
       toast.error("An unexpected error occurred. Please try again."); // Display a user-friendly error message for you
-
     }
   }
 
