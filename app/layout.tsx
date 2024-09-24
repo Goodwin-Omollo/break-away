@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
-        <Toaster closeButton richColors position="top-center" />
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );
