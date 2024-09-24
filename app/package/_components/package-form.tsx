@@ -108,7 +108,7 @@ export default function AddPackageForm() {
       );
     } catch (error) {
       console.error("Error in onSubmit:", error); // Log the error for debugging
-      toast.error("An unexpected error occurred. Please try again."); // Display a user-friendly error message
+      toast.error("An unexpected error occurred. Please try again."); // Display a user-friendly error message for you
     }
   }
 
