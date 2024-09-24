@@ -2,9 +2,10 @@ import * as React from "react";
 import type { UploadedFile } from "@/types";
 import { toast } from "sonner";
 import type { UploadFilesOptions } from "uploadthing/types";
+
 import { getErrorMessage } from "@/lib/handle-error";
-import { uploadFiles } from "@/utils/uploadthing";
 import { type OurFileRouter } from "@/app/api/uploadthing/core";
+import { uploadFiles } from "../utils/uploadthing";
 
 interface UseUploadFileProps
   extends Pick<
@@ -25,7 +26,7 @@ export function useUploadFile(
   );
   const [isUploading, setIsUploading] = React.useState(false);
 
-  async function uploadThings(files: File[]) {
+  async function onUpload(files: File[]) {
     setIsUploading(true);
     try {
       const res = await uploadFiles(endpoint, {
@@ -35,8 +36,7 @@ export function useUploadFile(
           setProgresses((prev) => {
             return {
               ...prev,
-              // @ts-ignore
-              [file]: progress,
+              [file.name]: progress,
             };
           });
         },
@@ -52,9 +52,9 @@ export function useUploadFile(
   }
 
   return {
+    onUpload,
     uploadedFiles,
     progresses,
-    uploadFiles: uploadThings,
     isUploading,
   };
 }
