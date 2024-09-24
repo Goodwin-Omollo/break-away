@@ -75,23 +75,34 @@ export default function AddPackageForm() {
   // Handle form submission
   // This function handles both image uploads and package data submission
   async function onSubmit(data: PackageFormValues) {
-    console.log(data);
 
-    if (localImageUrls.length > 0) {
-      await addPackage({
-        description: data.description,
-        type: data.type,
-        price: data.price,
-        location: data.location,
-        numberOfAdults: data.numberOfAdults,
-        name: data.name,
-        numberOfChildren: data.numberOfChildren,
-        imageUrls: localImageUrls,
-      });
+          // Check if URLs were successfully retrieved from the upload response
+          if (urls) {
+            // Call the `addPackage` mutation to save the package details
+            await addPackage({
+              description: data.description, // Package description (optional)
+              type: data.type, // Package type (individual or corporate)
+              price: data.price, // Price of the package
+              location: data.location, // Location of the package
+              numberOfAdults: data.numberOfAdults, // Number of adults for the package
+              name: data.name, // Name of the package
+              numberOfChildren: data.numberOfChildren, // Number of children for the package
+              imageUrls: urls, // Uploaded image URLs
+            });
+          } else {
+            throw new Error("No URLs returned from the upload process."); // Handle case where no URLs are returned
+          }
+        }),
+        {
+          loading: "Uploading Images then adding package", // Message to show during the process
+          success: "Images uploaded, then package added", // Message on success
+          error: "Something went wrong", // Message on error
+        }
+      );
+    } catch (error) {
+      console.error("Error in onSubmit:", error); // Log the error for debugging
+      toast.error("An unexpected error occurred. Please try again."); // Display a user-friendly error message for you
 
-      console.log("urls", localImageUrls);
-      toast.success("Added package successfully");
-      setLocalImageUrls([]);
     }
   }
 
