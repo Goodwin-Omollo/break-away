@@ -90,8 +90,8 @@ export default function AddPackageForm() {
   async function onSubmit(data: PackageFormValues) {
     console.log(data);
 
-    if (localImageUrls.length > 0) {
-      await addPackage({
+    setTimeout(() => {
+      addPackage({
         description: data.description,
         type: data.type,
         price: data.price,
@@ -105,7 +105,11 @@ export default function AddPackageForm() {
       console.log("urls", localImageUrls);
       toast.success("Added package successfully");
       setLocalImageUrls([]);
-    }
+    }, 5000);
+
+    // if (localImageUrls.length > 0) {
+
+    // }
   }
 
   return (
