@@ -75,13 +75,6 @@ export default function AddPackageForm() {
   // Handle form submission
   // This function handles both image uploads and package data submission
   async function onSubmit(data: PackageFormValues) {
-    try {
-      // Display a loading toast to the user while images are being uploaded
-      await toast.promise(
-        // Start uploading the selected files
-        startUpload(data.imageUrls).then(async (res) => {
-          // Map over the upload response to extract URLs of uploaded images
-          const urls = res?.map((re) => re.url);
 
           // Check if URLs were successfully retrieved from the upload response
           if (urls) {
@@ -109,6 +102,7 @@ export default function AddPackageForm() {
     } catch (error) {
       console.error("Error in onSubmit:", error); // Log the error for debugging
       toast.error("An unexpected error occurred. Please try again."); // Display a user-friendly error message for you
+
     }
   }
 
