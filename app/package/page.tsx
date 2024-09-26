@@ -10,8 +10,8 @@ type Props = {};
 const PackageHome = async (props: Props) => {
   const preloadPackages = await preloadQuery(api.package.getAllPackages);
   return (
-    <div className="">
-      <h1 className="">Packages</h1>
+    <div className="px-4 pt-8 max-w-7xl mx-auto">
+      <h1 className="text-xl font-bold">Packages</h1>
       <PackageFormCard />
       <PackageList preloadedPackages={preloadPackages} />
     </div>

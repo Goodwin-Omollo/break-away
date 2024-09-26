@@ -6,7 +6,7 @@ type Props = {};
 
 const PackageFormCard = (props: Props) => {
   return (
-    <Card className="max-w-[200px]">
+    <Card className="max-w-[200px] my-4">
       <CardHeader className="flex flex-row justify-between items-center gap-3">
         <CardTitle>New Package</CardTitle>
         <NewPackageDialog />

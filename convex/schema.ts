@@ -6,6 +6,7 @@ export default defineSchema({
     name: v.string(),
     imageUrls: v.optional(v.array(v.string())),
     price: v.optional(v.number()),
+    county: v.optional(v.array(v.string())),
     location: v.optional(v.string()),
     description: v.optional(v.string()),
     type: v.optional(v.union(v.literal("individual"), v.literal("corporate"))),
@@ -33,7 +34,7 @@ export default defineSchema({
     bedAndBreakfast: v.boolean(),
     tourGuide: v.boolean(),
     packageId: v.id("package"),
-  }),
+  }).index("by_PackageId", ["packageId"]),
   activity: defineTable({
     activityName: v.string(),
     duration: v.number(),

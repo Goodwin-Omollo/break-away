@@ -15,6 +15,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as inclusion from "../inclusion.js";
 import type * as package from "../package.js";
 
 /**
@@ -26,6 +27,7 @@ import type * as package from "../package.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  inclusion: typeof inclusion;
   package: typeof package;
 }>;
 export declare const api: FilterApi<

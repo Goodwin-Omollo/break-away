@@ -26,6 +26,7 @@ export const addPackage = mutation({
     type: v.optional(v.union(v.literal("individual"), v.literal("corporate"))),
     numberOfAdults: v.optional(v.number()),
     numberOfChildren: v.optional(v.number()),
+    county: v.optional(v.array(v.string())),
     features: v.optional(
       v.array(
         v.object({
@@ -105,6 +106,7 @@ export const updatePackage = mutation({
     type: v.optional(v.union(v.literal("individual"), v.literal("corporate"))),
     numberOfAdults: v.optional(v.number()),
     numberOfChildren: v.optional(v.number()),
+    county: v.optional(v.array(v.string())),
     features: v.optional(
       v.array(
         v.object({
@@ -116,6 +118,7 @@ export const updatePackage = mutation({
   },
   handler: async (ctx, args) => {
     const { packageId, ...fieldsToUpdate } = args;
+    console.log("args", args);
 
     // Check if the package exists
     const packageExists = await ctx.db.get(packageId);
