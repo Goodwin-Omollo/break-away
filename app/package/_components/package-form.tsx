@@ -89,13 +89,14 @@ export default function AddPackageForm({ singlePackage }: Props) {
       toast.error(e.message);
     },
   });
+
   // Handle form submission
   // This function handles both image uploads and package data submission
   async function onSubmit(data: PackageFormValues) {
     try {
       toast.promise(
-        startUpload(data.imageUrls).then(async (response) => {
-          const urls = response?.map((file) => file.url) || [];
+        onUpload(data.imageUrls).then(async (response) => {
+          const urls = response || [];
 
           updatePackage({
             packageId: singlePackage._id,
@@ -106,13 +107,14 @@ export default function AddPackageForm({ singlePackage }: Props) {
             numberOfAdults: data.numberOfAdults, // Number of adults for the package
             name: data.name, // Name of the package
             numberOfChildren: data.numberOfChildren, // Number of children for the package
-            imageUrls: urls, // Uploaded image URLs
-            features: [],
+            imageUrls: singlePackage.imageUrls
+              ? [...urls, ...singlePackage.imageUrls]
+              : urls, // Uploaded image URLs
           });
         }),
         {
           loading: "Uploading image",
-          success: "Uploaded Successfully",
+          success: "Images Uploaded & Package Updated",
           error(error) {
             return getErrorMessage(error);
           },
@@ -160,7 +162,7 @@ export default function AddPackageForm({ singlePackage }: Props) {
                       <FileUploader
                         value={field.value}
                         onValueChange={field.onChange}
-                        maxFiles={7}
+                        maxFileCount={7}
                         maxSize={4 * 1024 * 1024}
                         progresses={progresses}
                         // pass the onUpload function here for direct upload
@@ -322,3 +324,4 @@ export default function AddPackageForm({ singlePackage }: Props) {
     </div>
   );
 }
+
