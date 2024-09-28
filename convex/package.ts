@@ -118,7 +118,6 @@ export const updatePackage = mutation({
   },
   handler: async (ctx, args) => {
     const { packageId, ...fieldsToUpdate } = args;
-    console.log("args", args);
 
     // Check if the package exists
     const packageExists = await ctx.db.get(packageId);

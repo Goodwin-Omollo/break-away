@@ -42,7 +42,9 @@ export function useUploadFile(
         },
       });
 
+      const urls = await res.map((r) => r.url);
       setUploadedFiles((prev) => (prev ? [...prev, ...res] : res));
+      return urls;
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
