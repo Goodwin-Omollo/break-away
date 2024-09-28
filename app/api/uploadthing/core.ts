@@ -1,24 +1,23 @@
+import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
 
+// Initialize Uploadthing
 const f = createUploadthing();
 
-// FileRouter for your app, can contain multiple FileRoutes
+// Define FileRouter
 export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
   packageImage: f({
     image: { maxFileSize: "128MB", maxFileCount: 7 },
   })
-    // Set permissions and file types for this FileRoute
-    .middleware(async ({ req, files }) => {
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return {};
+    .middleware(async () => {
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("file url", file.url);
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
+      console.log(`File URL: ${file.url}, Uploaded by: ${metadata.userId}`);
       return {
-        fileUrl: file.url,
+        url: file.url,
       };
     }),
 } satisfies FileRouter;

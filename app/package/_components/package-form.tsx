@@ -25,7 +25,7 @@ import { api } from "@/convex/_generated/api";
 import { Loader } from "lucide-react";
 import { Doc } from "@/convex/_generated/dataModel";
 import InclusionsSheet from "./inclusion-form";
-import { useState } from "react";
+import { getErrorMessage } from "../../../lib/handle-error";
 
 // Schema validation using Zod
 // Ensures form input adheres to defined rules such as required fields, types, and value limits
@@ -68,7 +68,6 @@ export default function AddPackageForm({ singlePackage }: Props) {
       numberOfChildren: singlePackage.numberOfChildren,
     },
   });
-  const [localUrls, setLocalUrls] = useState<string[]>([]);
 
   // Convex mutation hook to call an API function to add the package
   const updatePackage = useMutation(api.package.updatePackage);
@@ -77,78 +76,51 @@ export default function AddPackageForm({ singlePackage }: Props) {
   });
 
   // Destructure the required values from the custom hook for file uploading
-  const { progresses, uploadedFiles } = useUploadFile("packageImage", {
-    defaultUploadedFiles: [],
-  });
+  const { progresses, uploadedFiles, onUpload } = useUploadFile(
+    "packageImage",
+    {
+      defaultUploadedFiles: [],
+    }
+  );
 
   // Initialize the file uploading process with Uploadthing
   const { startUpload, isUploading } = useUploadThing("packageImage", {
-    onClientUploadComplete(res) {
-      toast.info("Uplaod complete");
-      const urls = res.map((re) => re.url);
-      console.log("urls", urls);
-      setLocalUrls(urls);
-    },
-    onUploadBegin() {
-      toast.warning("Uploading...");
+    onUploadError(e) {
+      toast.error(e.message);
     },
   });
   // Handle form submission
   // This function handles both image uploads and package data submission
   async function onSubmit(data: PackageFormValues) {
-    startUpload(data.imageUrls);
     try {
-      if (localUrls.length > 0) {
-        await updatePackage({
-          packageId: singlePackage._id,
-          description: data.description, // Package description (optional)
-          type: data.type, // Package type (individual or corporate)
-          price: data.price, // Price of the package
-          location: data.location, // Location of the package
-          numberOfAdults: data.numberOfAdults, // Number of adults for the package
-          name: data.name, // Name of the package
-          numberOfChildren: data.numberOfChildren, // Number of children for the package
-          imageUrls: localUrls, // Uploaded image URLs
-          features: [],
-        });
+      toast.promise(
+        startUpload(data.imageUrls).then(async (response) => {
+          const urls = response?.map((file) => file.url) || [];
 
-        toast.success("Package Updated");
-        setLocalUrls([]);
-      }
-
-      // Display a loading toast to the user while images are being uploaded
-      // toast.promise(
-      //   // Start uploading the selected files
-      //   startUpload(data.imageUrls).then(async (res) => {
-      //     // Map over the upload response to extract URLs of uploaded images
-      //     const da = await res;
-      //     console.log("res", da);
-      //     const urls = res?.map((da) => da.url) || [];
-      //     console.log("urls", urls);
-
-      //     // Call the `updatePackage` mutation to save the package details
-      //     await updatePackage({
-      //       packageId: singlePackage._id,
-      //       description: data.description, // Package description (optional)
-      //       type: data.type, // Package type (individual or corporate)
-      //       price: data.price, // Price of the package
-      //       location: data.location, // Location of the package
-      //       numberOfAdults: data.numberOfAdults, // Number of adults for the package
-      //       name: data.name, // Name of the package
-      //       numberOfChildren: data.numberOfChildren, // Number of children for the package
-      //       imageUrls: urls, // Uploaded image URLs
-      //       features: [],
-      //     });
-      //   }),
-      //   {
-      //     loading: "Uploading Images then adding package", // Message to show during the process
-      //     success: "Images uploaded, then package added", // Message on success
-      //     error: "Something went wrong", // Message on error
-      //   }
-      // );
+          updatePackage({
+            packageId: singlePackage._id,
+            description: data.description, // Package description (optional)
+            type: data.type, // Package type (individual or corporate)
+            price: data.price, // Price of the package
+            location: data.location, // Location of the package
+            numberOfAdults: data.numberOfAdults, // Number of adults for the package
+            name: data.name, // Name of the package
+            numberOfChildren: data.numberOfChildren, // Number of children for the package
+            imageUrls: urls, // Uploaded image URLs
+            features: [],
+          });
+        }),
+        {
+          loading: "Uploading image",
+          success: "Uploaded Successfully",
+          error(error) {
+            return getErrorMessage(error);
+          },
+        }
+      );
     } catch (error) {
-      console.error("Error in onSubmit:", error); // Log the error for debugging
-      toast.error("An unexpected error occurred. Please try again."); // Display a user-friendly error message for you
+      console.error(error);
+      toast.error("Error Uploading & Updating");
     }
   }
 
@@ -186,12 +158,14 @@ export default function AddPackageForm({ singlePackage }: Props) {
                     <FormLabel>Images</FormLabel>
                     <FormControl>
                       <FileUploader
-                        value={field.value} // Selected files are stored in form state
-                        onValueChange={field.onChange} // Update form state when file selection changes
-                        maxFiles={7} // Maximum number of files to upload
-                        maxSize={4 * 1024 * 1024} // Max file size set to 4MB
-                        progresses={progresses} // Pass in the progress state to show progress bars
-                        disabled={isUploading} // Disable the uploader when files are uploading
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        maxFiles={7}
+                        maxSize={4 * 1024 * 1024}
+                        progresses={progresses}
+                        // pass the onUpload function here for direct upload
+                        // onUpload={uploadFiles}
+                        disabled={isUploading}
                       />
                     </FormControl>
                     <FormMessage />
